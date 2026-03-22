@@ -31,7 +31,7 @@ app.use(cors({
 }));
 
 // Preflight
-app.options('*', cors());
+app.options(/.*/, cors());
 
 /* ===============================
    MIDDLEWARE
