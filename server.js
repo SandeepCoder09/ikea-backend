@@ -14,6 +14,8 @@ const app = express();
 
 const allowedOrigins = [
     "http://localhost:3000",
+    "https://127.0.0.1:3000",
+    "http://10.81.143.223:5500",
     "https://ikeahomesolution.vercel.app"
 ];
 
@@ -31,7 +33,7 @@ app.use(cors({
 }));
 
 // Preflight
-app.options(/.*/, cors());
+// app.options(/.*/, cors());
 
 /* ===============================
    MIDDLEWARE
