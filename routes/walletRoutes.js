@@ -217,4 +217,53 @@ router.get('/bank', protect, async (req, res) => {
     }
 });
 
+/* ── POST /api/wallet/daily-checkin ── */
+router.post('/daily-checkin', protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        // Get today's date string (YYYY-MM-DD) in local time
+        const today = new Date();
+        const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+        // Check the user's last check-in date
+        let lastCheckInStr = null;
+        if (user.lastCheckIn) {
+            const lastDate = new Date(user.lastCheckIn);
+            lastCheckInStr = lastDate.getFullYear() + '-' + String(lastDate.getMonth() + 1).padStart(2, '0') + '-' + String(lastDate.getDate()).padStart(2, '0');
+        }
+
+        // Prevent double claiming
+        if (lastCheckInStr === todayStr) {
+            return res.status(400).json({ success: false, message: 'Already checked in today' });
+        }
+
+        // Add ₹1 to wallet & update last check-in date
+        user.walletBalance += 1;
+        user.lastCheckIn = new Date();
+        await user.save();
+
+        // (Optional but recommended) Create a transaction record so the user sees it in their history
+        await Transaction.create({
+            user: user._id,
+            type: 'deposit', // or 'gift' / 'bonus' depending on your frontend filters
+            amount: 1,
+            status: 'success',
+            note: 'Daily Check-in Reward',
+            balanceAfter: user.walletBalance
+        });
+
+        res.json({
+            success: true,
+            message: '₹1 added for daily check-in!',
+            newBalance: user.walletBalance
+        });
+
+    } catch (err) {
+        console.error("Daily Check-in Error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 module.exports = router;

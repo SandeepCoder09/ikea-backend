@@ -9,13 +9,12 @@ dotenv.config();
 const app = express();
 
 /* ===============================
-   CORS (FIXED FOR PRODUCTION)
+   CORS (FIXED FOR LOCAL & PRODUCTION)
 ================================ */
 
 const allowedOrigins = [
-    "http://localhost:3000",
-    "https://127.0.0.1:3000",
-    "http://10.81.143.223:5500",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
     "https://ikeahomesolution.vercel.app"
 ];
 
@@ -23,7 +22,13 @@ app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true); // Postman / curl
 
-        if (allowedOrigins.includes(origin)) {
+        // Automatically allow ANY local network IP on port 5500 (10.x, 172.x, 192.x)
+        const isLocalNetwork =
+            origin.startsWith("http://192.") ||
+            origin.startsWith("http://172.") ||
+            origin.startsWith("http://10.");
+
+        if (allowedOrigins.includes(origin) || (isLocalNetwork && origin.endsWith(":5500"))) {
             return callback(null, true);
         } else {
             return callback(new Error("CORS blocked: " + origin));

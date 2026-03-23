@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
     referralCode: { type: String, unique: true },        // their own code
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     walletBalance: { type: Number, default: 0 },
+    lastCheckIn: { type: Date, default: null },
     withdrawPin: { type: String, default: null },       // hashed 4-digit PIN
     isActive: { type: Boolean, default: true },
     isAdmin: { type: Boolean, default: false },
